@@ -25,15 +25,6 @@ const ActiveChat = (props) => {
   const { user } = props;
   const conversation = props.conversation || {};
 
-  const sortMessages = (messages) => {
-    const sorted = messages.sort((a, b) => {
-      const aTime = new Date(a.createdAt)
-      const bTime = new Date(b.createdAt)
-      return aTime - bTime
-    })
-    return sorted
-  }
-
   return (
     <Box className={classes.root}>
       {conversation.otherUser && (
@@ -44,7 +35,7 @@ const ActiveChat = (props) => {
           />
           <Box className={classes.chatContainer}>
             <Messages
-              messages={sortMessages(conversation.messages)}
+              messages={conversation.messages}
               otherUser={conversation.otherUser}
               userId={user.id}
             />
