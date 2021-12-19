@@ -3,6 +3,16 @@ const { User, Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
+// sorting function
+const sortMessages = async (messages) => {
+  const sorted =  await messages.sort((a, b) => {
+    const aTime = new Date(a.createdAt)
+    const bTime = new Date(b.createdAt)
+    return aTime - bTime
+  })
+  return sorted
+}
+
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
 router.get("/", async (req, res, next) => {
@@ -21,7 +31,7 @@ router.get("/", async (req, res, next) => {
       attributes: ["id"],
       order: [[Message, "createdAt", "DESC"]],
       include: [
-        { model: Message, order: [["createdAt", "DESC"]] },
+        { model: Message, order: ["createdAt", "DESC"] },
         {
           model: User,
           as: "user1",
@@ -50,6 +60,9 @@ router.get("/", async (req, res, next) => {
     for (let i = 0; i < conversations.length; i++) {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
+
+      // sort messages
+      convoJSON.messages = await sortMessages(convoJSON.messages)
 
       // set a property "otherUser" so that frontend will have easier access
       if (convoJSON.user1) {
