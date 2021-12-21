@@ -91,9 +91,22 @@ export const updateConvoStatusInStore = (state, data) => {
       const convoCopy = { ...convo };
       convoCopy.user1LastActive = data.user1LastActive;
       convoCopy.user2LastActive = data.user2LastActive;
+      const user1LastActiveDate = new Date(convoCopy.user1LastActive)
+      const user2LastActiveDate = new Date(convoCopy.user2LastActive)
       convoCopy.user1Id = data.user1Id;
       convoCopy.user2Id = data.user2Id;
       
+      const messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt);
+      const messageSenderId = convoCopy.messages[convoCopy.messages.length - 1].senderId;
+      if (messageSenderId === convoCopy.user1) {
+        user2LastActiveDate && user2LastActiveDate < messageCreatedAt ? 
+        convoCopy.isLatestMessageSeen = false :
+        convoCopy.isLatestMessageSeen = true
+      } else {
+        user1LastActiveDate && user1LastActiveDate < messageCreatedAt ? 
+        convoCopy.isLatestMessageSeen = false :
+        convoCopy.isLatestMessageSeen = true
+      }
       return convoCopy;
     } else {
       return convo;

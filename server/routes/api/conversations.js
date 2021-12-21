@@ -82,6 +82,19 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
+
+      // set boolean value for if latest message is seen by other user
+      const messageCreatedAt = convoJSON.messages[convoJSON.messages.length - 1].createdAt;
+      const messageSenderId = convoJSON.messages[convoJSON.messages.length - 1].senderId;
+      if (messageSenderId === convoJSON.user1) {
+        convoJSON.user2LastActive && convoJSON.user2LastActive < messageCreatedAt ? 
+        convoJSON.isLatestMessageSeen = false :
+        convoJSON.isLatestMessageSeen = true
+      } else {
+        convoJSON.user1LastActive && convoJSON.user1LastActive < messageCreatedAt ? 
+        convoJSON.isLatestMessageSeen = false :
+        convoJSON.isLatestMessageSeen = true
+      }
       conversations[i] = convoJSON;
     }
 
