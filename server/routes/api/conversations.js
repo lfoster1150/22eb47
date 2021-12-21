@@ -16,7 +16,6 @@ const sortMessages = async (messages) => {
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
 router.get("/", async (req, res, next) => {
-  console.log(Op)
   try {
     if (!req.user) {
       return res.sendStatus(401);

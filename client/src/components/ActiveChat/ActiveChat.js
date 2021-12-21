@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import { updateConversation } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,8 +23,30 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = (props) => {
   const classes = useStyles();
-  const { user } = props;
+  const { user, activeConversation, updateConversation } = props;
   const conversation = props.conversation || {};
+
+  useEffect(() => {
+    if (conversation.id) {
+      console.log("mount id:", conversation.id)
+      const body = {
+        convoId: conversation.id,
+        isInChat: true
+      }
+      updateConversation(body)
+    }
+  }, [activeConversation]);
+
+  useEffect(() => () => {
+    if (conversation.id) {
+      console.log("unmount id:", conversation.id)
+      const body = {
+        convoId: conversation.id,
+        isInChat: false
+      }
+      updateConversation(body)
+    }
+  }, [activeConversation]);
 
   return (
     <Box className={classes.root}>
@@ -53,6 +76,7 @@ const ActiveChat = (props) => {
 
 const mapStateToProps = (state) => {
   return {
+    activeConversation: state.activeConversation,
     user: state.user,
     conversation:
       state.conversations &&
@@ -62,4 +86,12 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ActiveChat);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateConversation: (body) => {
+      dispatch(updateConversation(body));
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(ActiveChat);
