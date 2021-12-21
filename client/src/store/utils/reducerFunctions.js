@@ -72,8 +72,23 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     if (convo.otherUser.id === recipientId) {
       const convoCopy = { ...convo };
       convoCopy.id = message.conversationId;
+      convoCopy.user1LastActive = null;
+      convoCopy.user2LastActive = Date.now();
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
+      return convoCopy;
+    } else {
+      return convo;
+    }
+  });
+};
+
+export const updateConvoStatusInStore = (state, data) => {
+  return state.map((convo) => {
+    if (convo.id === data.id) {
+      const convoCopy = { ...convo };
+      convoCopy.user1LastActive = data.user1LastActive;
+      convoCopy.user2LastActive = data.user2LastActive;
       return convoCopy;
     } else {
       return convo;
