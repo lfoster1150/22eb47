@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
@@ -26,27 +26,27 @@ const ActiveChat = (props) => {
   const { user, activeConversation, updateConversation } = props;
   const conversation = props.conversation || {};
 
+  const handleUpdateConversation = useCallback((id, isInChat) => {
+    const body = {
+      convoId: id,
+      isInChat: isInChat
+    }
+    updateConversation(body)
+  }, [updateConversation])
+
   useEffect(() => {
     if (conversation.id) {
-      console.log("mount id:", conversation.id)
-      const body = {
-        convoId: conversation.id,
-        isInChat: true
-      }
-      updateConversation(body)
+      console.log("mount id: ", conversation.id)
+      handleUpdateConversation(conversation.id, true)
     }
-  }, [activeConversation]);
-
+  }, [activeConversation, handleUpdateConversation, conversation.id]);
+  
   useEffect(() => () => {
     if (conversation.id) {
-      console.log("unmount id:", conversation.id)
-      const body = {
-        convoId: conversation.id,
-        isInChat: false
-      }
-      updateConversation(body)
+      console.log("unmount id: ", conversation.id)
+      handleUpdateConversation(conversation.id, false)
     }
-  }, [activeConversation]);
+  }, [activeConversation, handleUpdateConversation, conversation.id]);
 
   return (
     <Box className={classes.root}>
