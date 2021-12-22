@@ -12,6 +12,10 @@ const sortMessages = async (messages) => {
   })
   return sorted
 }
+// function to calculate unread messages
+const getUnreadMessages = (messages, userLastActive) => {
+  return messages.filter((message) => userLastActive && (parseFloat(message.createdAt.getTime()) > parseFloat(userLastActive)))
+}
 
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
@@ -83,17 +87,28 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
 
-      // set boolean value for if latest message is seen by other user
+      // set boolean value for if latest message is seen by other user and calculate unreadmessages
       const messageCreatedAt = convoJSON.messages[convoJSON.messages.length - 1].createdAt;
       const messageSenderId = convoJSON.messages[convoJSON.messages.length - 1].senderId;
       if (messageSenderId === convoJSON.user1Id) {
         convoJSON.user2LastActive && (convoJSON.user2LastActive < messageCreatedAt) ? 
         convoJSON.isLatestMessageSeen = false :
         convoJSON.isLatestMessageSeen = true
+
+        if (convoJSON.user2LastActive && (convoJSON.user2LastActive < messageCreatedAt)) {
+          convoJSON.isLatestMessageSeen = false;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, convoJSON.user2LastActive).length;
+        } else {
+          convoJSON.isLatestMessageSeen = true;
+        }
+
       } else {
-        convoJSON.user1LastActive && (convoJSON.user1LastActive < messageCreatedAt) ? 
-        convoJSON.isLatestMessageSeen = false :
-        convoJSON.isLatestMessageSeen = true
+        if (convoJSON.user1LastActive && (convoJSON.user1LastActive < messageCreatedAt)) {
+          convoJSON.isLatestMessageSeen = false;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, convoJSON.user1LastActive).length;
+        } else {
+          convoJSON.isLatestMessageSeen = true;
+        }
       }
       conversations[i] = convoJSON;
     }
