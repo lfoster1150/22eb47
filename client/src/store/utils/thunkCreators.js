@@ -83,8 +83,13 @@ export const updateConversation = (body) => async (dispatch) => {
   try {
     console.log("UPDATE THUNK")
     const { data } = await axios.put("/api/conversations", body);
-    dispatch(updateConversationStatus(data));
-    updateConvoSocket(data)
+    const parsedData = {
+      ...data, 
+      user1LastActive: parseFloat(data.user1LastActive),
+      user2LastActive: parseFloat(data.user2LastActive)
+    }
+    dispatch(updateConversationStatus(parsedData));
+    updateConvoSocket(parsedData)
   } catch (error) {
     console.error(error);
   }

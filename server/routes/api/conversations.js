@@ -120,13 +120,13 @@ router.put("/", async (req, res, next) => {
     })
     if (conversation.dataValues.user1Id === userId) {
       const conversationUpdated = await conversation.update({
-        user1LastActive: isInChat ? null : Sequelize.literal('CURRENT_TIMESTAMP')
+        user1LastActive: isInChat ? null : parseFloat(Date.now())
       });
       res.json(conversationUpdated);
     } else if (conversation.dataValues.user2Id === userId) {
       const conversationUpdated = await conversation.update({
-        user2LastActive: isInChat ? null : Sequelize.literal('CURRENT_TIMESTAMP')
-    });
+        user2LastActive: isInChat ? null : parseFloat(Date.now())
+      });
       res.json(conversationUpdated);
     } else {
       return res.sendStatus(401);

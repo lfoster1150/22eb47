@@ -4,12 +4,12 @@ const Message = require("./message");
 
 const Conversation = db.define("conversation", {
   user1LastActive: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    type: Sequelize.BIGINT,
+    defaultValue: 1640196717046
   },
   user2LastActive: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    type: Sequelize.BIGINT,
+    defaultValue: 1640196717046
   },
 });
 

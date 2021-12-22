@@ -18,9 +18,10 @@ export const addMessageToStore = (state, payload) => {
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
 
-      const user1LastActiveDate = new Date(convoCopy.user1LastActive).getTime();
-      const user2LastActiveDate = new Date(convoCopy.user2LastActive).getTime();
-      const messageCreatedAt = new Date(message.createdAt).getTime();
+      const user1LastActiveDate = convoCopy.user1LastActive;
+      const user2LastActiveDate = convoCopy.user2LastActive;
+      let messageCreatedAt = new Date(message.createdAt)
+      messageCreatedAt = messageCreatedAt.getTime();
       const messageSenderId = message.senderId;
 
       if (messageSenderId === convoCopy.user1Id) {
@@ -90,7 +91,7 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       const convoCopy = { ...convo };
       convoCopy.id = message.conversationId;
       convoCopy.user1LastActive = null;
-      convoCopy.user2LastActive = Date.now();
+      convoCopy.user2LastActive = Date.now().getTime();
       convoCopy.user1Id = message.senderId;
       convoCopy.user2Id = convo.otherUser.id;
       convoCopy.messages = [...convo.messages, message];
@@ -109,8 +110,8 @@ export const updateConvoStatusInStore = (state, data) => {
       const convoCopy = { ...convo };
       convoCopy.user1LastActive = data.user1LastActive;
       convoCopy.user2LastActive = data.user2LastActive;
-      const user1LastActiveDate = new Date(convoCopy.user1LastActive).getTime();
-      const user2LastActiveDate = new Date(convoCopy.user2LastActive).getTime();
+      const user1LastActiveDate = convoCopy.user1LastActive;
+      const user2LastActiveDate = convoCopy.user2LastActive;
 
       const messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt).getTime();
       const messageSenderId = convoCopy.messages[convoCopy.messages.length - 1].senderId;
