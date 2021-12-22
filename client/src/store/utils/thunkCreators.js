@@ -81,8 +81,10 @@ export const fetchConversations = () => async (dispatch) => {
 
 export const updateConversation = (body) => async (dispatch) => {
   try {
+    console.log("UPDATE THUNK")
     const { data } = await axios.put("/api/conversations", body);
     dispatch(updateConversationStatus(data));
+    updateConvoSocket(data)
   } catch (error) {
     console.error(error);
   }
@@ -101,17 +103,21 @@ const sendMessage = (data, body) => {
   });
 };
 
+const updateConvoSocket = (data) => {
+  socket.emit("update-convo", data);
+};
+
 // message format to send: {recipientId, text, conversationId}
 // conversationId will be set to null if its a brand new conversation
 export const postMessage = (body) => async (dispatch) => {
   try {
     const data = await saveMessage(body);
+    console.log(data)
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
       dispatch(setNewMessage(data.message));
     }
-
     sendMessage(data, body);
   } catch (error) {
     console.error(error);
