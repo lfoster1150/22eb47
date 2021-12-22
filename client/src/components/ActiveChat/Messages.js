@@ -13,9 +13,9 @@ const Messages = (props) => {
         const length = messages.length;
         return message.senderId === userId ? (
           index === length - 1 ? (
-            <SenderBubble key={message.id} text={message.text} time={time} last={true} isLatestMessageSeen={isLatestMessageSeen} />
+            <SenderBubble key={message.id} text={message.text} time={time} isLatestMessageSeen={isLatestMessageSeen} otherUser={otherUser} />
             ) : (
-            <SenderBubble key={message.id} text={message.text} time={time} last={false} />
+            <SenderBubble key={message.id} text={message.text} time={time} />
           )
         ) : (
             <OtherUserBubble key={message.id} text={message.text} time={time} otherUser={otherUser} />

@@ -24,24 +24,28 @@ const useStyles = makeStyles(() => ({
   bubble: {
     background: "#F4F6FA",
     borderRadius: "10px 10px 0 10px"
-  }
+  },
+  avatar: {
+    height: 20,
+    width: 20,
+    marginRight: 0,
+    marginTop: 10
+  },
 }));
 
 const SenderBubble = (props) => {
   const classes = useStyles();
-  const { time, text, isLast, isLatestMessageSeen, otherUser } = props;
+  const { time, text, isLatestMessageSeen, otherUser } = props;
   return (
     <Box className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
-      {
-        isLast && isLatestMessageSeen && (
-            <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.avatar}></Avatar>
-          )
-
-      }
+        {
+          isLatestMessageSeen && <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.avatar}></Avatar>
+        }
+      
     </Box>
   );
 };
