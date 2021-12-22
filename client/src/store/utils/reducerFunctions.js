@@ -1,4 +1,5 @@
 export const addMessageToStore = (state, payload) => {
+  console.log("STATE: ", state)
   const { message, sender } = payload;
   // if sender isn't null, that means the message needs to be put in a brand new convo
   if (sender !== null) {
@@ -8,6 +9,7 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
+    newConvo.isLatestMessageSeen = false;
     return [newConvo, ...state];
   }
 
@@ -16,6 +18,24 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
+
+      const user1LastActiveDate = new Date(convoCopy.user1LastActive).getTime();
+      const user2LastActiveDate = new Date(convoCopy.user2LastActive).getTime();
+      const messageCreatedAt = new Date(message.createdAt).getTime();
+      const messageSenderId = message.senderId;
+
+      if (messageSenderId === convoCopy.user1Id) {
+        console.log("USER1: ", user2LastActiveDate && (user2LastActiveDate < messageCreatedAt))
+        user2LastActiveDate && (user2LastActiveDate < messageCreatedAt) ? 
+        convoCopy.isLatestMessageSeen = false :
+        convoCopy.isLatestMessageSeen = true
+      } else {
+        console.log("USER2: ", convoCopy.user1LastActive && (convoCopy.user1LastActive < messageCreatedAt))
+        user1LastActiveDate && (user1LastActiveDate < messageCreatedAt) ? 
+        convoCopy.isLatestMessageSeen = false :
+        convoCopy.isLatestMessageSeen = true
+      }
+
       return convoCopy;
     } else {
       return convo;
@@ -78,6 +98,7 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       convoCopy.user2Id = convo.otherUser.id;
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
+      convoCopy.isLatestMessageSeen = false;
       return convoCopy;
     } else {
       return convo;
@@ -91,22 +112,20 @@ export const updateConvoStatusInStore = (state, data) => {
       const convoCopy = { ...convo };
       convoCopy.user1LastActive = data.user1LastActive;
       convoCopy.user2LastActive = data.user2LastActive;
-      const user1LastActiveDate = convoCopy.user1LastActive;
-      const user2LastActiveDate = convoCopy.user2LastActive;
-      convoCopy.user1Id = data.user1Id;
-      convoCopy.user2Id = data.user2Id;
-      
-      const messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt);
+      const user1LastActiveDate = new Date(convoCopy.user1LastActive).getTime();
+      const user2LastActiveDate = new Date(convoCopy.user2LastActive).getTime();
+
+      const messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt).getTime();
       const messageSenderId = convoCopy.messages[convoCopy.messages.length - 1].senderId;
-      if (messageSenderId === convoCopy.user1) {
-        console.log("USER1: ", user2LastActiveDate && user2LastActiveDate < messageCreatedAt)
-        user2LastActiveDate && user2LastActiveDate < messageCreatedAt ? 
+
+      if (messageSenderId === convoCopy.user1Id) {
+        console.log("USER1: ", user2LastActiveDate && (user2LastActiveDate < messageCreatedAt))
+        user2LastActiveDate && (user2LastActiveDate < messageCreatedAt) ? 
         convoCopy.isLatestMessageSeen = false :
         convoCopy.isLatestMessageSeen = true
       } else {
-        console.log("USER2 user1LastActiveDate: ", user1LastActiveDate)
-        console.log("USER2 messageCreatedAt: ", messageCreatedAt)
-        user1LastActiveDate && user1LastActiveDate < messageCreatedAt ? 
+        console.log("USER2: ", convoCopy.user1LastActive && (convoCopy.user1LastActive < messageCreatedAt))
+        user1LastActiveDate && (user1LastActiveDate < messageCreatedAt) ? 
         convoCopy.isLatestMessageSeen = false :
         convoCopy.isLatestMessageSeen = true
       }

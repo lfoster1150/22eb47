@@ -34,19 +34,27 @@ const ActiveChat = (props) => {
     updateConversation(body)
   }, [updateConversation])
 
+  const handleUnmountUpdate = useCallback(() => {
+    const body = {
+      convoId: conversation.id,
+      isInChat: false
+    }
+    updateConversation(body)
+  }, [updateConversation, conversation.id])
+
   useEffect(() => {
     if (conversation.id) {
-      console.log("mount id: ", conversation.id)
+      window.addEventListener('beforeunload', handleUnmountUpdate);
       handleUpdateConversation(conversation.id, true)
     }
-  }, [activeConversation, handleUpdateConversation, conversation.id]);
+  }, [activeConversation, handleUpdateConversation, handleUnmountUpdate, conversation.id]);
   
   useEffect(() => () => {
     if (conversation.id) {
-      console.log("unmount id: ", conversation.id)
-      handleUpdateConversation(conversation.id, false)
+      handleUnmountUpdate();
+      window.removeEventListener('beforeunload', handleUnmountUpdate);
     }
-  }, [activeConversation, handleUpdateConversation, conversation.id]);
+  }, [activeConversation, handleUnmountUpdate, conversation.id]);
 
   return (
     <Box className={classes.root}>
