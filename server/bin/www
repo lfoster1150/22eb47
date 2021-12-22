@@ -48,7 +48,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("update-convo", (data) => {
-    console.log("UPDATE CONVO: ", data)
     socket.broadcast.emit("update-convo", data);
   });
 

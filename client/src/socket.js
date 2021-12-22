@@ -23,7 +23,6 @@ socket.on("connect", () => {
     store.dispatch(setNewMessage(data.message, data.sender));
   });
   socket.on("update-convo", (data) => {
-    console.log("UPDATE CONVO: ", data)
     store.dispatch(updateConversationStatus(data));
   });
 });

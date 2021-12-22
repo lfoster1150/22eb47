@@ -117,10 +117,14 @@ const updateConvoSocket = (data) => {
 export const postMessage = (body) => async (dispatch) => {
   try {
     const data = await saveMessage(body);
-    console.log(data)
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
+      const convoData = {
+        convoId: data.message.conversationId,
+        isInChat: true
+      };
+      updateConversation(convoData)
       dispatch(setNewMessage(data.message));
     }
     sendMessage(data, body);
