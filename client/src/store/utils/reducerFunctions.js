@@ -1,10 +1,6 @@
 const getUnreadMessages = (messages, userLastActive, id) => {
   return messages.filter((message) => {
     const createdAtDate = new Date(message.createdAt)
-    console.log("message.senderId === id", userLastActive)
-    console.log("message.senderId === id", createdAtDate.getTime())
-    console.log("message.senderId === id", (message.senderId === id))
-    
     return (
       (userLastActive && 
       (createdAtDate.getTime() > userLastActive) &&
@@ -116,7 +112,7 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       const convoCopy = { ...convo };
       convoCopy.id = message.conversationId;
       convoCopy.user1LastActive = null;
-      convoCopy.user2LastActive = Date.now().getTime();
+      convoCopy.user2LastActive = new Date(Date.now()).getTime();
       convoCopy.user1Id = message.senderId;
       convoCopy.user2Id = convo.otherUser.id;
       convoCopy.messages = [...convo.messages, message];

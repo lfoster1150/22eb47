@@ -81,7 +81,6 @@ export const fetchConversations = () => async (dispatch) => {
 
 export const updateConversation = (body) => async (dispatch) => {
   try {
-    console.log("UPDATE THUNK")
     const { data } = await axios.put("/api/conversations", body);
     const parsedData = {
       ...data, 
