@@ -13,8 +13,14 @@ const sortMessages = async (messages) => {
   return sorted
 }
 // function to calculate unread messages
-const getUnreadMessages = (messages, userLastActive) => {
-  return messages.filter((message) => parseFloat(userLastActive) && (parseFloat(message.createdAt.getTime()) > parseFloat(userLastActive)))
+const getUnreadMessages = (messages, userLastActive, id) => {
+  return messages.filter((message) => {
+    const createdAtDate = new Date(message.createdAt)
+    return (
+      (parseFloat(userLastActive) && 
+      (createdAtDate.getTime() > userLastActive) &&
+      (message.senderId === id)) === true
+    )})
 }
 
 // get all conversations for a user, include latest message text for preview, and all messages
@@ -89,21 +95,26 @@ router.get("/", async (req, res, next) => {
       convoJSON.latestMessageUser = convoJSON.messages[convoJSON.messages.length - 1].senderId;
 
       // set boolean value for if latest message is seen by other user and calculate unreadmessages
-      const messageCreatedAt = parseFloat(convoJSON.messages[convoJSON.messages.length - 1].createdAt);
+      const messageCreatedAt = convoJSON.messages[convoJSON.messages.length - 1].createdAt.getTime();
       const messageSenderId = convoJSON.messages[convoJSON.messages.length - 1].senderId;
+      const user1LastActive = convoJSON.user1LastActive ? parseFloat(convoJSON.user1LastActive) : 0;
+      const user2LastActive = convoJSON.user2LastActive ? parseFloat(convoJSON.user2LastActive) : 0;
+
       if (messageSenderId === convoJSON.user1Id) {
-        if (parseFloat(convoJSON.user2LastActive) && (parseFloat(convoJSON.user2LastActive) < messageCreatedAt)) {
+        if (user2LastActive && (user2LastActive < messageCreatedAt) === true) {
           convoJSON.isLatestMessageSeen = false;
-          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, convoJSON.user2LastActive).length;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, user2LastActive, convoJSON.user1Id).length;
         } else {
           convoJSON.isLatestMessageSeen = true;
+          convoJSON.unreadMessages = 0;
         }
       } else {
-        if (parseFloat(convoJSON.user1LastActive) && (parseFloat(convoJSON.user1LastActive) < messageCreatedAt)) {
+        if (user1LastActive && (user1LastActive < messageCreatedAt) === true) {
           convoJSON.isLatestMessageSeen = false;
-          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, convoJSON.user1LastActive).length;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, user1LastActive, convoJSON.user2Id).length;
         } else {
           convoJSON.isLatestMessageSeen = true;
+          convoJSON.unreadMessages = 0;
         }
       }
       conversations[i] = convoJSON;
