@@ -1,6 +1,10 @@
 const getUnreadMessages = (messages, userLastActive, id) => {
   return messages.filter((message) => {
     const createdAtDate = new Date(message.createdAt)
+    console.log("message.senderId === id", userLastActive)
+    console.log("message.senderId === id", createdAtDate.getTime())
+    console.log("message.senderId === id", (message.senderId === id))
+    
     return (
       (userLastActive && 
       (createdAtDate.getTime() > userLastActive) &&
@@ -43,6 +47,7 @@ export const addMessageToStore = (state, payload) => {
           convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user2LastActiveDate, convoCopy.user1Id).length;
         } else {
           convoCopy.isLatestMessageSeen = true;
+          convoCopy.unreadMessages = 0;
         }
       } else {
         if (user1LastActiveDate && (user1LastActiveDate < messageCreatedAt)) {
@@ -50,6 +55,7 @@ export const addMessageToStore = (state, payload) => {
           convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user1LastActiveDate, convoCopy.user2Id).length;
         } else {
           convoCopy.isLatestMessageSeen = true;
+          convoCopy.unreadMessages = 0;
         }
       }
 
@@ -133,8 +139,8 @@ export const updateConvoStatusInStore = (state, data) => {
       convoCopy.user2LastActive = data.user2LastActive;
       const user1LastActiveDate = convoCopy.user1LastActive;
       const user2LastActiveDate = convoCopy.user2LastActive;
-
-      const messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt).getTime();
+      let messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt)
+      messageCreatedAt = messageCreatedAt.getTime();
       const messageSenderId = convoCopy.messages[convoCopy.messages.length - 1].senderId;
 
       if (messageSenderId === convoCopy.user1Id) {
@@ -143,6 +149,7 @@ export const updateConvoStatusInStore = (state, data) => {
           convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user2LastActiveDate, convoCopy.user1Id).length;
         } else {
           convoCopy.isLatestMessageSeen = true;
+          convoCopy.unreadMessages = 0;
         }
       } else {
         if (user1LastActiveDate && (user1LastActiveDate < messageCreatedAt)) {
@@ -150,6 +157,7 @@ export const updateConvoStatusInStore = (state, data) => {
           convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user1LastActiveDate, convoCopy.user2Id).length;
         } else {
           convoCopy.isLatestMessageSeen = true;
+          convoCopy.unreadMessages = 0;
         }
       }
 
