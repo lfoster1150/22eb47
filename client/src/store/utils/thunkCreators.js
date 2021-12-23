@@ -89,7 +89,11 @@ export const updateConversation = (body) => async (dispatch) => {
       user2LastActive: parseFloat(data.user2LastActive)
     }
     dispatch(updateConversationStatus(parsedData));
-    updateConvoSocket(parsedData)
+    const convoData = {
+      convoId: data.id,
+      isInChat: true
+    };
+    updateConvoSocket(convoData);
   } catch (error) {
     console.error(error);
   }
