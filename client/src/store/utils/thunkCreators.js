@@ -124,7 +124,7 @@ export const postMessage = (body) => async (dispatch) => {
         convoId: data.message.conversationId,
         isInChat: true
       };
-      updateConversation(convoData)
+      updateConvoSocket(convoData)
       dispatch(setNewMessage(data.message));
     }
     sendMessage(data, body);
