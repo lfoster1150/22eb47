@@ -19,7 +19,7 @@ const getUnreadMessages = (messages, userLastActive, id) => {
     return (
       (parseFloat(userLastActive) && 
       (createdAtDate.getTime() > userLastActive) &&
-      (message.senderId === id)) === true
+      (message.senderId === id))
     )})
 }
 
