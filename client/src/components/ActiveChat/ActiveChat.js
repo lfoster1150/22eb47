@@ -26,12 +26,12 @@ const ActiveChat = (props) => {
   const { user, activeConversation, updateConversation } = props;
   const conversation = props.conversation || {};
 
-  const handleUpdateConversation = useCallback((id, isInChat) => {
+  const handleUpdateConversation = useCallback(async (id, isInChat) => {
     const body = {
       convoId: id,
       isInChat: isInChat
     }
-    updateConversation(body)
+    await updateConversation(body)
   }, [updateConversation])
 
   const handleUnmountUpdate = useCallback(async () => {
