@@ -44,7 +44,7 @@ const Chat = (props) => {
         online={otherUser.online}
         sidebar={true}
       />
-      <ChatContent conversation={conversation} />
+      <ChatContent conversation={conversation} isUnread={isUnread} />
       {
         isUnread && <Chip color="primary" label={unreadMessages}/>
       }
