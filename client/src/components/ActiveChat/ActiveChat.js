@@ -34,12 +34,12 @@ const ActiveChat = (props) => {
     updateConversation(body)
   }, [updateConversation])
 
-  const handleUnmountUpdate = useCallback(() => {
+  const handleUnmountUpdate = useCallback(async () => {
     const body = {
       convoId: conversation.id,
       isInChat: false
     }
-    updateConversation(body)
+    await updateConversation(body)
   }, [updateConversation, conversation.id])
 
   useEffect(() => {

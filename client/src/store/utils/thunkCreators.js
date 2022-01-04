@@ -82,17 +82,15 @@ export const fetchConversations = () => async (dispatch) => {
 export const updateConversation = (body) => async (dispatch) => {
   try {
     const { data } = await axios.put("/api/conversations", body);
+    const user1LastActive = parseFloat(data.user1LastActive) ? parseFloat(data.user1LastActive) : null;
+    const user2LastActive = parseFloat(data.user2LastActive) ? parseFloat(data.user2LastActive) : null;
     const parsedData = {
       ...data, 
-      user1LastActive: parseFloat(data.user1LastActive),
-      user2LastActive: parseFloat(data.user2LastActive)
+      user1LastActive: user1LastActive,
+      user2LastActive: user2LastActive
     }
     dispatch(updateConversationStatus(parsedData));
-    const convoData = {
-      convoId: data.id,
-      isInChat: true
-    };
-    updateConvoSocket(convoData);
+    updateConvoSocket(parsedData);
   } catch (error) {
     console.error(error);
   }
@@ -123,11 +121,7 @@ export const postMessage = (body) => async (dispatch) => {
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
-      const convoData = {
-        convoId: data.message.conversationId,
-        isInChat: true
-      };
-      updateConvoSocket(convoData)
+      updateConvoSocket(data.conversation)
       dispatch(setNewMessage(data.message));
     }
     sendMessage(data, body);

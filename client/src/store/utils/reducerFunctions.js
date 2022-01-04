@@ -33,6 +33,7 @@ export const addMessageToStore = (state, payload) => {
 
       const user1LastActiveDate = convoCopy.user1LastActive;
       const user2LastActiveDate = convoCopy.user2LastActive;
+
       let messageCreatedAt = new Date(message.createdAt)
       messageCreatedAt = messageCreatedAt.getTime();
       const messageSenderId = message.senderId;
