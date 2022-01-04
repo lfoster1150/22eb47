@@ -21,6 +21,7 @@ export const addMessageToStore = (state, payload) => {
     newConvo.latestMessageText = message.text;
     newConvo.latestMessageUser = message.senderId;
     newConvo.isLatestMessageSeen = false;
+    newConvo.unreadMessages = 1;
     return [newConvo, ...state];
   }
 
@@ -41,7 +42,7 @@ export const addMessageToStore = (state, payload) => {
       if (messageSenderId === convoCopy.user1Id) {
         if ((user2LastActiveDate && (user2LastActiveDate < messageCreatedAt))) {
           convoCopy.isLatestMessageSeen = false
-          convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user2LastActiveDate, convoCopy.user1Id).length;
+          convoCopy.unreadMessages = convoCopy.unreadMessages + 1;
         } else {
           convoCopy.isLatestMessageSeen = true;
           convoCopy.unreadMessages = 0;
@@ -49,7 +50,7 @@ export const addMessageToStore = (state, payload) => {
       } else {
         if (user1LastActiveDate && (user1LastActiveDate < messageCreatedAt)) {
           convoCopy.isLatestMessageSeen = false;
-          convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user1LastActiveDate, convoCopy.user2Id).length;
+          convoCopy.unreadMessages = convoCopy.unreadMessages + 1;
         } else {
           convoCopy.isLatestMessageSeen = true;
           convoCopy.unreadMessages = 0;
