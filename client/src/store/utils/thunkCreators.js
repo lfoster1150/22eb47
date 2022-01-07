@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  updateConversationStatus
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -78,6 +79,24 @@ export const fetchConversations = () => async (dispatch) => {
   }
 };
 
+export const updateConversation = (body) => async (dispatch) => {
+  console.log("updateConvoSocket", body)
+  try {
+    const { data } = await axios.put("/api/conversations", body);
+    const user1LastActive = parseFloat(data.user1LastActive) ? parseFloat(data.user1LastActive) : null;
+    const user2LastActive = parseFloat(data.user2LastActive) ? parseFloat(data.user2LastActive) : null;
+    const parsedData = {
+      ...data, 
+      user1LastActive: user1LastActive,
+      user2LastActive: user2LastActive
+    }
+    dispatch(updateConversationStatus(parsedData));
+    updateConvoSocket(parsedData);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
   return data;
@@ -91,6 +110,10 @@ const sendMessage = (data, body) => {
   });
 };
 
+const updateConvoSocket = (data) => {
+  socket.emit("update-convo", data);
+};
+
 // message format to send: {recipientId, text, conversationId}
 // conversationId will be set to null if its a brand new conversation
 export const postMessage = (body) => async (dispatch) => {
@@ -101,7 +124,8 @@ export const postMessage = (body) => async (dispatch) => {
     } else {
       dispatch(setNewMessage(data.message));
     }
-
+    dispatch(updateConversationStatus(data.conversation));
+    updateConvoSocket(data.conversation)
     sendMessage(data, body);
   } catch (error) {
     console.error(error);

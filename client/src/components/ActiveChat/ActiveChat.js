@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import { updateConversation } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,8 +23,38 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = (props) => {
   const classes = useStyles();
-  const { user } = props;
+  const { user, activeConversation, updateConversation } = props;
   const conversation = props.conversation || {};
+
+  const handleUpdateConversation = useCallback(async (id, isInChat) => {
+    const body = {
+      convoId: id,
+      isInChat: isInChat
+    }
+    await updateConversation(body)
+  }, [updateConversation])
+
+  const handleUnmountUpdate = useCallback(async () => {
+    const body = {
+      convoId: conversation.id,
+      isInChat: false
+    }
+    await updateConversation(body)
+  }, [updateConversation, conversation.id])
+
+  useEffect(() => {
+    if (conversation.id) {
+      window.addEventListener('beforeunload', handleUnmountUpdate);
+      handleUpdateConversation(conversation.id, true)
+    }
+  }, [activeConversation, handleUpdateConversation, handleUnmountUpdate, conversation.id]);
+  
+  useEffect(() => () => {
+    if (conversation.id) {
+      handleUnmountUpdate();
+      window.removeEventListener('beforeunload', handleUnmountUpdate);
+    }
+  }, [activeConversation, handleUnmountUpdate, conversation.id]);
 
   return (
     <Box className={classes.root}>
@@ -38,6 +69,7 @@ const ActiveChat = (props) => {
               messages={conversation.messages}
               otherUser={conversation.otherUser}
               userId={user.id}
+              isLatestMessageSeen={conversation.isLatestMessageSeen}
             />
             <Input
               otherUser={conversation.otherUser}
@@ -53,6 +85,7 @@ const ActiveChat = (props) => {
 
 const mapStateToProps = (state) => {
   return {
+    activeConversation: state.activeConversation,
     user: state.user,
     conversation:
       state.conversations &&
@@ -62,4 +95,12 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ActiveChat);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateConversation: (body) => {
+      dispatch(updateConversation(body));
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(ActiveChat);

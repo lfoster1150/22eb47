@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { User, Conversation, Message } = require("../../db/models");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
 // sorting function
@@ -11,6 +11,16 @@ const sortMessages = async (messages) => {
     return aTime - bTime
   })
   return sorted
+}
+// function to calculate unread messages
+const getUnreadMessages = (messages, userLastActive, id) => {
+  return messages.filter((message) => {
+    const createdAtDate = new Date(message.createdAt)
+    return (
+      (parseFloat(userLastActive) && 
+      (createdAtDate.getTime() > userLastActive) &&
+      (message.senderId === id))
+    )})
 }
 
 // get all conversations for a user, include latest message text for preview, and all messages
@@ -28,7 +38,7 @@ router.get("/", async (req, res, next) => {
           user2Id: userId,
         },
       },
-      attributes: ["id"],
+      attributes: ["id", "user1LastActive", "user2LastActive", "user1Id", "user2Id"],
       order: [[Message, "createdAt", "DESC"]],
       include: [
         { model: Message, order: ["createdAt", "DESC"] },
@@ -82,10 +92,73 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
+      convoJSON.latestMessageUser = convoJSON.messages[convoJSON.messages.length - 1].senderId;
+
+      // set boolean value for if latest message is seen by other user and calculate unreadmessages
+      const messageCreatedAt = convoJSON.messages[convoJSON.messages.length - 1].createdAt.getTime();
+      const messageSenderId = convoJSON.messages[convoJSON.messages.length - 1].senderId;
+      const user1LastActive = convoJSON.user1LastActive ? parseFloat(convoJSON.user1LastActive) : 0;
+      const user2LastActive = convoJSON.user2LastActive ? parseFloat(convoJSON.user2LastActive) : 0;
+
+      if (messageSenderId === convoJSON.user1Id) {
+        if (user2LastActive && (user2LastActive < messageCreatedAt) === true) {
+          convoJSON.isLatestMessageSeen = false;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, user2LastActive, convoJSON.user1Id).length;
+        } else {
+          convoJSON.isLatestMessageSeen = true;
+          convoJSON.unreadMessages = 0;
+        }
+      } else {
+        if (user1LastActive && (user1LastActive < messageCreatedAt) === true) {
+          convoJSON.isLatestMessageSeen = false;
+          convoJSON.unreadMessages = getUnreadMessages(convoJSON.messages, user1LastActive, convoJSON.user2Id).length;
+        } else {
+          convoJSON.isLatestMessageSeen = true;
+          convoJSON.unreadMessages = 0;
+        }
+      }
       conversations[i] = convoJSON;
     }
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update conversation with the last time stamp viewed by each user.
+// If null the user is currently in the chat
+router.put("/", async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const { convoId, isInChat } = req.body;
+    const userId = req.user.id;
+    const conversation = await Conversation.findOne({
+      where: {
+        id: convoId
+      },
+    });
+
+    if (conversation.user1Id === req.user.id || conversation.user2Id === req.user.id) {
+      if (conversation.dataValues.user1Id === userId) {
+        const conversationUpdated = await conversation.update({
+          user1LastActive: isInChat ? null : parseFloat(Date.now())
+        });
+        res.json(conversationUpdated);
+      } else if (conversation.dataValues.user2Id === userId) {
+        const conversationUpdated = await conversation.update({
+          user2LastActive: isInChat ? null : parseFloat(Date.now())
+        });
+        res.json(conversationUpdated);
+      } else {
+        return res.sendStatus(401);
+      }
+    } else {
+      return res.sendStatus(401);
+    }
+
   } catch (error) {
     next(error);
   }

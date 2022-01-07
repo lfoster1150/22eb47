@@ -1,5 +1,5 @@
-import React from "react";
-import { Box } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import { Box, Chip } from "@material-ui/core";
 import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
@@ -21,12 +21,20 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = (props) => {
   const classes = useStyles();
+  const [isUnread, setIsUnread] = useState(false);
   const { conversation } = props;
-  const { otherUser } = conversation;
-
+  const { otherUser, unreadMessages } = conversation;
+  
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
   };
+
+  useEffect(() => {
+    if (otherUser.id) {
+      const parseUnreadMessages = parseFloat(unreadMessages)
+      setIsUnread((parseUnreadMessages && (otherUser.id === conversation.latestMessageUser)) === true)
+    };
+  }, [unreadMessages, otherUser.id, conversation.latestMessageUser]);
 
   return (
     <Box onClick={() => handleClick(conversation)} className={classes.root}>
@@ -36,7 +44,10 @@ const Chat = (props) => {
         online={otherUser.online}
         sidebar={true}
       />
-      <ChatContent conversation={conversation} />
+      <ChatContent conversation={conversation} isUnread={isUnread} />
+      {
+        isUnread && <Chip color="primary" label={unreadMessages}/>
+      }
     </Box>
   );
 };
