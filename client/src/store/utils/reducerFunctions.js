@@ -1,14 +1,3 @@
-const getUnreadMessages = (messages, userLastActive, id) => {
-  return messages.filter((message) => {
-    const createdAtDate = new Date(message.createdAt)
-    return (
-      (userLastActive && 
-      (createdAtDate.getTime() > userLastActive) &&
-      (message.senderId === id)) === true
-    ) 
-  })
-}
-
 export const addMessageToStore = (state, payload) => {
   const { message, sender } = payload;
   // if sender isn't null, that means the message needs to be put in a brand new convo
@@ -19,9 +8,6 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
-    newConvo.latestMessageUser = message.senderId;
-    newConvo.isLatestMessageSeen = false;
-    newConvo.unreadMessages = 1;
     return [newConvo, ...state];
   }
 
@@ -30,33 +16,6 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
-      convoCopy.latestMessageUser = message.senderId;
-
-      const user1LastActiveDate = convoCopy.user1LastActive;
-      const user2LastActiveDate = convoCopy.user2LastActive;
-
-      let messageCreatedAt = new Date(message.createdAt)
-      messageCreatedAt = messageCreatedAt.getTime();
-      const messageSenderId = message.senderId;
-
-      if (messageSenderId === convoCopy.user1Id) {
-        if ((user2LastActiveDate && (user2LastActiveDate < messageCreatedAt))) {
-          convoCopy.isLatestMessageSeen = false
-          convoCopy.unreadMessages = convoCopy.unreadMessages + 1;
-        } else {
-          convoCopy.isLatestMessageSeen = true;
-          convoCopy.unreadMessages = 0;
-        }
-      } else {
-        if (user1LastActiveDate && (user1LastActiveDate < messageCreatedAt)) {
-          convoCopy.isLatestMessageSeen = false;
-          convoCopy.unreadMessages = convoCopy.unreadMessages + 1;
-        } else {
-          convoCopy.isLatestMessageSeen = true;
-          convoCopy.unreadMessages = 0;
-        }
-      }
-
       return convoCopy;
     } else {
       return convo;
@@ -113,52 +72,8 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     if (convo.otherUser.id === recipientId) {
       const convoCopy = { ...convo };
       convoCopy.id = message.conversationId;
-      convoCopy.user1LastActive = null;
-      convoCopy.user2LastActive = new Date(Date.now()).getTime();
-      convoCopy.user1Id = message.senderId;
-      convoCopy.user2Id = convo.otherUser.id;
       convoCopy.messages = [...convo.messages, message];
       convoCopy.latestMessageText = message.text;
-      convoCopy.latestMessageUser = message.senderId;
-      convoCopy.isLatestMessageSeen = false;
-      convoCopy.unreadMessages = 1;
-      return convoCopy;
-    } else {
-      return convo;
-    }
-  });
-};
-
-export const updateConvoStatusInStore = (state, data) => {
-  return state.map((convo) => {
-    if (convo.id === data.id) {
-      const convoCopy = { ...convo };
-      convoCopy.user1LastActive = data.user1LastActive;
-      convoCopy.user2LastActive = data.user2LastActive;
-      const user1LastActiveDate = convoCopy.user1LastActive;
-      const user2LastActiveDate = convoCopy.user2LastActive;
-      let messageCreatedAt = new Date(convoCopy.messages[convoCopy.messages.length - 1].createdAt)
-      messageCreatedAt = messageCreatedAt.getTime();
-      const messageSenderId = convoCopy.messages[convoCopy.messages.length - 1].senderId;
-
-      if (messageSenderId === convoCopy.user1Id) {
-        if (user2LastActiveDate && (user2LastActiveDate < messageCreatedAt)) {
-          convoCopy.isLatestMessageSeen = false;
-          convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user2LastActiveDate, convoCopy.user1Id).length;
-        } else {
-          convoCopy.isLatestMessageSeen = true;
-          convoCopy.unreadMessages = 0;
-        }
-      } else {
-        if (user1LastActiveDate && (user1LastActiveDate < messageCreatedAt)) {
-          convoCopy.isLatestMessageSeen = false;
-          convoCopy.unreadMessages = getUnreadMessages(convoCopy.messages, user1LastActiveDate, convoCopy.user2Id).length;
-        } else {
-          convoCopy.isLatestMessageSeen = true;
-          convoCopy.unreadMessages = 0;
-        }
-      }
-
       return convoCopy;
     } else {
       return convo;
